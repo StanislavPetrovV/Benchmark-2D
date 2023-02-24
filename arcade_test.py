@@ -30,7 +30,8 @@ class SpriteUnit(arcade.Sprite):
     def update(self):
         self.rotate()
         self.translate()
-        self.center_x, self.center_y = self.x, self.y
+        # self.center_x, self.center_y = self.x, self.y
+        self.set_position(self.x, self.y)  # much faster
 
 
 class SpriteHandler:
