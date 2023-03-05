@@ -1,3 +1,4 @@
 pygame
 raylib
 arcade
+pysdl2
