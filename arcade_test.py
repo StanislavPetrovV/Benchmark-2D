@@ -1,5 +1,26 @@
 from settings import *
 import arcade
+import pyglet
+import time, collections
+
+
+class FPSCounter:
+    def __init__(self):
+        self.time = time.perf_counter()
+        self.frame_times = collections.deque(maxlen=60)
+
+    def tick(self):
+        t1 = time.perf_counter()
+        dt = t1 - self.time
+        self.time = t1
+        self.frame_times.append(dt)
+
+    def get_fps(self):
+        total_time = sum(self.frame_times)
+        if total_time == 0:
+            return 0
+        else:
+            return len(self.frame_times) / sum(self.frame_times)
 
 
 class SpriteUnit(arcade.Sprite):
@@ -63,7 +84,10 @@ class SpriteHandler:
 
 class App(arcade.Window):
     def __init__(self):
-        super().__init__(*WIN_SIZE, center_window=True, antialiasing=False)
+        super().__init__(*WIN_SIZE, center_window=True, antialiasing=False, vsync=False)
+
+        self.fps = FPSCounter()
+
         self.dt = 0.0
         self.text = arcade.Text(text='text', start_x=0, start_y=WIN_H - FONT_SIZE,
                                font_size=FONT_SIZE, color=arcade.color.GREEN, bold=True)
@@ -72,8 +96,11 @@ class App(arcade.Window):
     def draw_fps(self):
         arcade.draw_xywh_rectangle_filled(self.text.x, self.text.y, *self.text.content_size,
                                           arcade.color.BLACK)
-        self.text.text = f'{round(1 / self.dt, 1)} FPS | {len(self.sprite_handler.sprites)} SPRITES'
+
+        self.text.text = f'{self.fps.get_fps():3.0f} FPS | {len(self.sprite_handler.sprites)} SPRITES'
         self.text.draw()
+
+        self.fps.tick()
 
     def on_mouse_press(self, x, y, button, modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT:
@@ -93,4 +120,5 @@ class App(arcade.Window):
 
 if __name__ == '__main__':
     app = App()
-    app.run()
+    #app.run()
+    pyglet.app.run(1e-6)
